@@ -1,38 +1,14 @@
-import React, { useState } from 'react';
-import { Search, ExternalLink, Youtube, Globe, Github, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, ExternalLink} from 'lucide-react';
+//Youtube, Globe, Github 
 
 const SearchSection: React.FC = () => {
   const [query, setQuery] = useState('');
-  const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [searchHistory, setSearchHistory] = useState<string[]>([
     'React hooks tutorial',
     'TypeScript best practices',
     'Tailwind CSS components',
   ]);
-
-  const searchEngines = [
-    { 
-      name: 'DuckDuckGo', 
-      icon: Globe, 
-      url: 'https://duckduckgo.com/?q=',
-      color: 'text-blue-400',
-      bg: 'bg-blue-500/20 hover:bg-blue-500/30'
-    },
-    { 
-      name: 'YouTube', 
-      icon: Youtube, 
-      url: 'https://www.youtube.com/results?search_query=',
-      color: 'text-red-400',
-      bg: 'bg-red-500/20 hover:bg-red-500/30'
-    },
-    { 
-      name: 'GitHub', 
-      icon: Github, 
-      url: 'https://github.com/search?q=',
-      color: 'text-gray-300',
-      bg: 'bg-gray-500/20 hover:bg-gray-500/30'
-    },
-  ];
 
   const quickLinks = [
     { name: 'YouTube', url: 'https://youtube.com', color: 'bg-red-500/20 text-red-300' },
@@ -43,32 +19,41 @@ const SearchSection: React.FC = () => {
     { name: 'Tailwind CSS', url: 'https://tailwindcss.com', color: 'bg-teal-500/20 text-teal-300' },
   ];
 
-  const handleSearch = (searchEngine: typeof searchEngines[0]) => {
-    if (!query.trim()) return;
-    
-    const searchUrl = searchEngine.url + encodeURIComponent(query);
-    setResultUrl(searchUrl); // display in iframe modal
+  // Google CSE ID
+  const CSE_ID = 'YOUR-CSE-ID-HERE'; // replace with your Google Custom Search Engine ID
 
-    // Add to search history
-    if (!searchHistory.includes(query)) {
-      setSearchHistory(prev => [query, ...prev.slice(0, 9)]);
+  // Load Google CSE script
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = `https://cse.google.com/cse.js?cx=${CSE_ID}`;
+    script.async = true;
+    document.body.appendChild(script);
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      // Add to search history
+      if (!searchHistory.includes(query)) {
+        setSearchHistory(prev => [query, ...prev.slice(0, 9)]);
+      }
+
+      // Trigger Google CSE search
+      const input = document.querySelector<HTMLInputElement>('input.gsc-input');
+      if (input) {
+        input.value = query;
+        const form = input.closest('form');
+        if (form) form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+      }
+
+      setQuery('');
     }
-    
-    setQuery('');
   };
 
   const handleDirectUrl = (url: string) => {
     window.open(url, '_blank');
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent, searchEngine?: typeof searchEngines[0]) => {
-    if (e.key === 'Enter') {
-      if (searchEngine) {
-        handleSearch(searchEngine);
-      } else if (searchEngines.length > 0) {
-        handleSearch(searchEngines[0]); // Default to first engine (DuckDuckGo)
-      }
-    }
   };
 
   return (
@@ -78,7 +63,7 @@ const SearchSection: React.FC = () => {
         <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
           Universal Search
         </h3>
-        
+
         <div className="relative max-w-2xl mx-auto">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
             <Search className="text-gray-400" size={20} />
@@ -87,37 +72,13 @@ const SearchSection: React.FC = () => {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onKeyPress={(e) => handleKeyPress(e)}
-            placeholder="Search anything on the web..."
+            onKeyPress={handleKeyPress}
+            placeholder="Search anything on your site..."
             className="w-full pl-12 pr-4 py-4 bg-gray-800/50 border border-gray-600 rounded-2xl 
                      focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
                      text-lg placeholder-gray-400 transition-all duration-200"
           />
         </div>
-      </div>
-
-      {/* Search Engines */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {searchEngines.map((engine) => {
-          const IconComponent = engine.icon;
-          return (
-            <button
-              key={engine.name}
-              onClick={() => handleSearch(engine)}
-              disabled={!query.trim()}
-              className={`
-                p-4 rounded-xl border border-gray-700 transition-all duration-200
-                ${engine.bg} ${query.trim() ? 'hover:scale-105' : 'opacity-50 cursor-not-allowed'}
-                disabled:hover:scale-100
-              `}
-            >
-              <div className="flex items-center justify-center space-x-3">
-                <IconComponent className={engine.color} size={24} />
-                <span className="font-semibold">Search on {engine.name}</span>
-              </div>
-            </button>
-          );
-        })}
       </div>
 
       {/* Quick Links */}
@@ -149,10 +110,7 @@ const SearchSection: React.FC = () => {
             {searchHistory.slice(0, 5).map((historyQuery, index) => (
               <button
                 key={index}
-                onClick={() => {
-                  setQuery(historyQuery);
-                  handleSearch(searchEngines[0]);
-                }}
+                onClick={() => setQuery(historyQuery)}
                 className="w-full text-left p-3 bg-gray-800/30 hover:bg-gray-700/50 
                          rounded-lg border border-gray-700/50 transition-colors duration-200
                          flex items-center space-x-3"
@@ -165,35 +123,10 @@ const SearchSection: React.FC = () => {
         </div>
       )}
 
-      {/* Tips */}
-      <div className="mt-auto pt-6 border-t border-gray-700">
-        <div className="text-center text-sm text-gray-400">
-          <p className="mb-2">💡 <strong>Pro Tips:</strong></p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
-            <p>• Press Enter to search on DuckDuckGo</p>
-            <p>• Click search engine buttons for specific searches</p>
-          </div>
-        </div>
+      {/* Embedded Google CSE Results */}
+      <div className="mt-6">
+        <div className="gcse-search"></div>
       </div>
-
-      {/* Embedded Results Modal */}
-      {resultUrl && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="relative bg-gray-900 w-11/12 h-5/6 rounded-2xl shadow-xl overflow-hidden">
-            <button
-              onClick={() => setResultUrl(null)}
-              className="absolute top-4 right-4 bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded-lg flex items-center space-x-1"
-            >
-              <X size={16} /> <span>Close</span>
-            </button>
-            <iframe
-              src={resultUrl}
-              className="w-full h-full"
-              title="Search Results"
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 };
