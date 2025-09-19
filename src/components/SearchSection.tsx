@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Search, ExternalLink } from 'lucide-react';
 
 const SearchSection: React.FC = () => {
@@ -18,35 +18,27 @@ const SearchSection: React.FC = () => {
     { name: 'Tailwind CSS', url: 'https://tailwindcss.com', color: 'bg-teal-500/20 text-teal-300' },
   ];
 
-  // Load Google CSE script once
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://cse.google.com/cse.js?cx=a5cce87917c84421b';
-    script.async = true;
-    document.body.appendChild(script);
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
+  const handleSearch = (q: string) => {
+    if (!q.trim()) return;
 
-  // Handle Enter key
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && query.trim()) {
-      // Add to search history
-      if (!searchHistory.includes(query)) {
-        setSearchHistory(prev => [query, ...prev.slice(0, 9)]);
-      }
-
-      // Trigger CSE search programmatically
-      const input = document.querySelector<HTMLInputElement>('input.gsc-input');
-      if (input) {
-        input.value = query;
-        const form = input.closest('form');
-        if (form) form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-      }
-
-      setQuery('');
+    // Add to search history
+    if (!searchHistory.includes(q)) {
+      setSearchHistory(prev => [q, ...prev.slice(0, 9)]);
     }
+
+    // Open Google search in a small popup window
+    const width = 800;
+    const height = 600;
+    const left = window.screenX + (window.innerWidth - width) / 2;
+    const top = window.screenY + (window.innerHeight - height) / 2;
+    const url = `https://www.google.com/search?q=${encodeURIComponent(q)}`;
+    window.open(url, 'GoogleSearch', `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`);
+
+    setQuery('');
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') handleSearch(query);
   };
 
   const handleDirectUrl = (url: string) => {
@@ -55,7 +47,7 @@ const SearchSection: React.FC = () => {
 
   return (
     <div className="h-full flex flex-col space-y-8">
-      {/* Custom Search Bar */}
+      {/* Search Bar */}
       <div className="text-center">
         <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
           Universal Search
@@ -106,7 +98,7 @@ const SearchSection: React.FC = () => {
             {searchHistory.slice(0, 5).map((historyQuery, index) => (
               <button
                 key={index}
-                onClick={() => setQuery(historyQuery)}
+                onClick={() => handleSearch(historyQuery)}
                 className="w-full text-left p-3 bg-gray-800/30 hover:bg-gray-700/50 
                          rounded-lg border border-gray-700/50 transition-colors duration-200
                          flex items-center space-x-3"
@@ -118,11 +110,6 @@ const SearchSection: React.FC = () => {
           </div>
         </div>
       )}
-
-      {/* Google CSE Results */}
-      <div className="mt-6">
-        <div className="gcse-search"></div>
-      </div>
     </div>
   );
 };
