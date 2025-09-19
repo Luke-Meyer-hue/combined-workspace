@@ -3,11 +3,13 @@ import { Search, ExternalLink, Youtube, Globe, Github } from 'lucide-react';
 
 const SearchSection: React.FC = () => {
   const [query, setQuery] = useState('');
+  const [resultURL, setResultURL] = useState<string | null>(null);
   const [searchHistory, setSearchHistory] = useState<string[]>([
     'React hooks tutorial',
     'TypeScript best practices',
     'Tailwind CSS components',
   ]);
+
 
   const searchEngines = [
     { 
@@ -46,7 +48,8 @@ const SearchSection: React.FC = () => {
     if (!query.trim()) return;
     
     const searchUrl = searchEngine.url + encodeURIComponent(query);
-    window.open(searchUrl, '_blank');
+    //window.open(searchUrl, '_blank');
+    setResultURL(searchUrl);
     
     // Add to search history
     if (!searchHistory.includes(query)) {
@@ -174,6 +177,27 @@ const SearchSection: React.FC = () => {
           </div>
         </div>
       </div>
+      {/* Result URL Display */}
+      {resultURL && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="relative bg-gray-900 w-11/12 h-5/6 rounded-2xl shadow-xl overflow-hidden">
+            {/* Close Button */}
+            <button
+              onClick={() => setResultURL(null)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+              >
+                Close x
+              </button>
+              {/* Iframe */}
+            <iframe
+              src={resultURL}
+              title="Search Result"
+              className="w-full h-full border-0"
+              //</div>sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
