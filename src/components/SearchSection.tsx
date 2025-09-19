@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, ExternalLink } from 'lucide-react';
+import { Search, ExternalLink, X } from 'lucide-react';
 
 const SearchSection: React.FC = () => {
   const [query, setQuery] = useState('');
@@ -8,6 +8,7 @@ const SearchSection: React.FC = () => {
     'TypeScript best practices',
     'Tailwind CSS components',
   ]);
+  const [modalUrl, setModalUrl] = useState<string | null>(null);
 
   const quickLinks = [
     { name: 'YouTube', url: 'https://youtube.com', color: 'bg-red-500/20 text-red-300' },
@@ -21,19 +22,14 @@ const SearchSection: React.FC = () => {
   const handleSearch = (q: string) => {
     if (!q.trim()) return;
 
-    // Add to search history
+    // Add to history
     if (!searchHistory.includes(q)) {
       setSearchHistory(prev => [q, ...prev.slice(0, 9)]);
     }
 
-    // Open Google search in a small popup window
-    const width = 800;
-    const height = 600;
-    const left = window.screenX + (window.innerWidth - width) / 2;
-    const top = window.screenY + (window.innerHeight - height) / 2;
+    // Open Google search in modal iframe
     const url = `https://www.google.com/search?q=${encodeURIComponent(q)}`;
-    window.open(url, 'GoogleSearch', `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`);
-
+    setModalUrl(url);
     setQuery('');
   };
 
@@ -107,6 +103,25 @@ const SearchSection: React.FC = () => {
                 <span className="text-gray-300 truncate">{historyQuery}</span>
               </button>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Modal for Google Search */}
+      {modalUrl && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="relative bg-gray-900 border-4 border-purple-500 rounded-2xl w-11/12 md:w-4/5 h-5/6 shadow-xl overflow-hidden">
+            <button
+              onClick={() => setModalUrl(null)}
+              className="absolute top-4 right-4 bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded-lg flex items-center space-x-1"
+            >
+              <X size={16} /> <span>Close</span>
+            </button>
+            <iframe
+              src={modalUrl}
+              className="w-full h-full rounded-xl"
+              title="Google Search Results"
+            />
           </div>
         </div>
       )}
