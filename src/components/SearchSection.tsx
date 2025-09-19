@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Search, ExternalLink } from 'lucide-react';
-//Youtube, Globe, Github
+
 const SearchSection: React.FC = () => {
   const [query, setQuery] = useState('');
   const [searchHistory, setSearchHistory] = useState<string[]>([
@@ -18,10 +18,10 @@ const SearchSection: React.FC = () => {
     { name: 'Tailwind CSS', url: 'https://tailwindcss.com', color: 'bg-teal-500/20 text-teal-300' },
   ];
 
-  // Load Google CSE script
+  // Load Google CSE script once
   useEffect(() => {
     const script = document.createElement('script');
-    script.src = 'https://cse.google.com/cse.js?cx=a5cce87917c84421b'; // your CSE ID
+    script.src = 'https://cse.google.com/cse.js?cx=a5cce87917c84421b';
     script.async = true;
     document.body.appendChild(script);
     return () => {
@@ -29,14 +29,15 @@ const SearchSection: React.FC = () => {
     };
   }, []);
 
+  // Handle Enter key
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      // Optional: add to search history
+    if (e.key === 'Enter' && query.trim()) {
+      // Add to search history
       if (!searchHistory.includes(query)) {
         setSearchHistory(prev => [query, ...prev.slice(0, 9)]);
       }
 
-      // Trigger Google search
+      // Trigger CSE search programmatically
       const input = document.querySelector<HTMLInputElement>('input.gsc-input');
       if (input) {
         input.value = query;
@@ -54,12 +55,11 @@ const SearchSection: React.FC = () => {
 
   return (
     <div className="h-full flex flex-col space-y-8">
-      {/* Main Search Bar */}
+      {/* Custom Search Bar */}
       <div className="text-center">
         <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
           Universal Search
         </h3>
-
         <div className="relative max-w-2xl mx-auto">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
             <Search className="text-gray-400" size={20} />
@@ -69,7 +69,7 @@ const SearchSection: React.FC = () => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Search anything on your site..."
+            placeholder="Search anything on the web..."
             className="w-full pl-12 pr-4 py-4 bg-gray-800/50 border border-gray-600 rounded-2xl 
                      focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
                      text-lg placeholder-gray-400 transition-all duration-200"
@@ -98,7 +98,7 @@ const SearchSection: React.FC = () => {
         </div>
       </div>
 
-      {/* Search History */}
+      {/* Recent Searches */}
       {searchHistory.length > 0 && (
         <div>
           <h4 className="text-lg font-semibold mb-4 text-gray-300">Recent Searches</h4>
@@ -119,7 +119,7 @@ const SearchSection: React.FC = () => {
         </div>
       )}
 
-      {/* Embedded Google CSE */}
+      {/* Google CSE Results */}
       <div className="mt-6">
         <div className="gcse-search"></div>
       </div>
