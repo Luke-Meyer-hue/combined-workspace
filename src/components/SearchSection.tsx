@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Search, ExternalLink} from 'lucide-react';
-//Youtube, Globe, Github 
-
+import React, { useEffect, useState } from 'react';
+import { Search, ExternalLink } from 'lucide-react';
+//Youtube, Globe, Github
 const SearchSection: React.FC = () => {
   const [query, setQuery] = useState('');
   const [searchHistory, setSearchHistory] = useState<string[]>([
@@ -19,13 +18,10 @@ const SearchSection: React.FC = () => {
     { name: 'Tailwind CSS', url: 'https://tailwindcss.com', color: 'bg-teal-500/20 text-teal-300' },
   ];
 
-  // Google CSE ID
-  const CSE_ID = 'YOUR-CSE-ID-HERE'; // replace with your Google Custom Search Engine ID
-
   // Load Google CSE script
   useEffect(() => {
     const script = document.createElement('script');
-    script.src = `https://cse.google.com/cse.js?cx=${CSE_ID}`;
+    script.src = 'https://cse.google.com/cse.js?cx=a5cce87917c84421b'; // your CSE ID
     script.async = true;
     document.body.appendChild(script);
     return () => {
@@ -35,12 +31,12 @@ const SearchSection: React.FC = () => {
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      // Add to search history
+      // Optional: add to search history
       if (!searchHistory.includes(query)) {
         setSearchHistory(prev => [query, ...prev.slice(0, 9)]);
       }
 
-      // Trigger Google CSE search
+      // Trigger Google search
       const input = document.querySelector<HTMLInputElement>('input.gsc-input');
       if (input) {
         input.value = query;
@@ -123,7 +119,7 @@ const SearchSection: React.FC = () => {
         </div>
       )}
 
-      {/* Embedded Google CSE Results */}
+      {/* Embedded Google CSE */}
       <div className="mt-6">
         <div className="gcse-search"></div>
       </div>
