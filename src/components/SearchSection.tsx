@@ -1,21 +1,20 @@
 import React, { useState } from 'react';
-import { Search, ExternalLink, Youtube, Globe, Github } from 'lucide-react';
+import { Search, ExternalLink, Youtube, Globe, Github, X } from 'lucide-react';
 
 const SearchSection: React.FC = () => {
   const [query, setQuery] = useState('');
-  const [resultURL, setResultURL] = useState<string | null>(null);
+  const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [searchHistory, setSearchHistory] = useState<string[]>([
     'React hooks tutorial',
     'TypeScript best practices',
     'Tailwind CSS components',
   ]);
 
-
   const searchEngines = [
     { 
-      name: 'Google', 
+      name: 'DuckDuckGo', 
       icon: Globe, 
-      url: 'https://www.google.com/search?q=',
+      url: 'https://duckduckgo.com/?q=',
       color: 'text-blue-400',
       bg: 'bg-blue-500/20 hover:bg-blue-500/30'
     },
@@ -48,9 +47,8 @@ const SearchSection: React.FC = () => {
     if (!query.trim()) return;
     
     const searchUrl = searchEngine.url + encodeURIComponent(query);
-    //window.open(searchUrl, '_blank');
-    setResultURL(searchUrl);
-    
+    setResultUrl(searchUrl); // display in iframe modal
+
     // Add to search history
     if (!searchHistory.includes(query)) {
       setSearchHistory(prev => [query, ...prev.slice(0, 9)]);
@@ -68,7 +66,7 @@ const SearchSection: React.FC = () => {
       if (searchEngine) {
         handleSearch(searchEngine);
       } else if (searchEngines.length > 0) {
-        handleSearch(searchEngines[0]); // Default to first search engine
+        handleSearch(searchEngines[0]); // Default to first engine (DuckDuckGo)
       }
     }
   };
@@ -100,7 +98,7 @@ const SearchSection: React.FC = () => {
 
       {/* Search Engines */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {searchEngines.map((engine, index) => {
+        {searchEngines.map((engine) => {
           const IconComponent = engine.icon;
           return (
             <button
@@ -126,7 +124,7 @@ const SearchSection: React.FC = () => {
       <div>
         <h4 className="text-lg font-semibold mb-4 text-gray-300">Quick Links</h4>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {quickLinks.map((link, index) => (
+          {quickLinks.map((link) => (
             <button
               key={link.name}
               onClick={() => handleDirectUrl(link.url)}
@@ -172,28 +170,26 @@ const SearchSection: React.FC = () => {
         <div className="text-center text-sm text-gray-400">
           <p className="mb-2">💡 <strong>Pro Tips:</strong></p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
-            <p>• Press Enter to search on Google</p>
+            <p>• Press Enter to search on DuckDuckGo</p>
             <p>• Click search engine buttons for specific searches</p>
           </div>
         </div>
       </div>
-      {/* Result URL Display */}
-      {resultURL && (
+
+      {/* Embedded Results Modal */}
+      {resultUrl && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="relative bg-gray-900 w-11/12 h-5/6 rounded-2xl shadow-xl overflow-hidden">
-            {/* Close Button */}
             <button
-              onClick={() => setResultURL(null)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
-              >
-                Close x
-              </button>
-              {/* Iframe */}
+              onClick={() => setResultUrl(null)}
+              className="absolute top-4 right-4 bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded-lg flex items-center space-x-1"
+            >
+              <X size={16} /> <span>Close</span>
+            </button>
             <iframe
-              src={resultURL}
-              title="Search Result"
-              className="w-full h-full border-0"
-              //</div>sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+              src={resultUrl}
+              className="w-full h-full"
+              title="Search Results"
             />
           </div>
         </div>
