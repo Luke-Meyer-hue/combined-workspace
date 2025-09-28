@@ -29,7 +29,6 @@ const SearchSection: React.FC = () => {
   const handleSearch = async (q: string) => {
     if (!q.trim()) return;
 
-    // Save to history
     if (!searchHistory.includes(q)) {
       setSearchHistory(prev => [q, ...prev.slice(0, 9)]);
     }
@@ -57,12 +56,6 @@ const SearchSection: React.FC = () => {
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") handleSearch(query);
   };
-
-  const handleClickResult = (link: string) => {
-    window.open(link, "_blank");
-  };
-
-  const handleDirectUrl = (url: string) => window.open(url, "_blank");
 
   return (
     <div className="h-full flex flex-col space-y-8">
@@ -93,16 +86,18 @@ const SearchSection: React.FC = () => {
         <h4 className="text-lg font-semibold mb-4 text-gray-300">Quick Links</h4>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {quickLinks.map(link => (
-            <button
+            <a
               key={link.name}
-              onClick={() => handleDirectUrl(link.url)}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
               className={`p-3 rounded-lg border border-gray-700 transition-all duration-200
                          hover:scale-105 hover:border-gray-600 ${link.color}
                          flex items-center justify-center space-x-2`}
             >
               <ExternalLink size={16} />
               <span className="font-medium">{link.name}</span>
-            </button>
+            </a>
           ))}
         </div>
       </div>
@@ -141,14 +136,16 @@ const SearchSection: React.FC = () => {
 
             <div className="p-6 overflow-y-auto flex-1">
               {results.map((item, idx) => (
-                <div
+                <a
                   key={idx}
-                  className="mb-4 p-3 bg-gray-800/50 rounded-lg border border-gray-700 cursor-pointer hover:bg-gray-700 transition"
-                  onClick={() => handleClickResult(item.link)}
+                  href={item.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block mb-4 p-3 bg-gray-800/50 rounded-lg border border-gray-700 hover:bg-gray-700 transition"
                 >
                   <h4 className="font-semibold text-purple-400">{item.title}</h4>
                   <p className="text-gray-300 mt-1">{item.snippet}</p>
-                </div>
+                </a>
               ))}
             </div>
           </div>
