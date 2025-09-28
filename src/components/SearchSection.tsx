@@ -16,7 +16,6 @@ const SearchSection: React.FC = () => {
   ]);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [showPanel, setShowPanel] = useState(false);
-  const [iframeUrl, setIframeUrl] = useState<string | null>(null);
 
   const quickLinks = [
     { name: "YouTube", url: "https://youtube.com", color: "bg-red-500/20 text-red-300" },
@@ -26,12 +25,6 @@ const SearchSection: React.FC = () => {
     { name: "React Docs", url: "https://react.dev", color: "bg-cyan-500/20 text-cyan-300" },
     { name: "Tailwind CSS", url: "https://tailwindcss.com", color: "bg-teal-500/20 text-teal-300" },
   ];
-
-  // Determine if we can embed a site in an iframe
-  const canEmbed = (url: string) => {
-    const blockedHosts = ["google.com", "gmail.com", "docs.google.com"];
-    return !blockedHosts.some(host => url.includes(host));
-  };
 
   const handleSearch = async (q: string) => {
     if (!q.trim()) return;
@@ -53,7 +46,6 @@ const SearchSection: React.FC = () => {
         }));
         setResults(mapped);
         setShowPanel(true);
-        setIframeUrl(null); // show list first
       }
     } catch (err) {
       console.error("Search failed", err);
@@ -67,14 +59,8 @@ const SearchSection: React.FC = () => {
   };
 
   const handleClickResult = (link: string) => {
-    if (canEmbed(link)) {
-      setIframeUrl(link);
-    } else {
-      window.open(link, "_blank");
-    }
+    window.open(link, "_blank");
   };
-
-  const handleBack = () => setIframeUrl(null);
 
   const handleDirectUrl = (url: string) => window.open(url, "_blank");
 
@@ -153,30 +139,18 @@ const SearchSection: React.FC = () => {
               <X size={16} /> <span>Close</span>
             </button>
 
-            {!iframeUrl ? (
-              <div className="p-6 overflow-y-auto flex-1">
-                {results.map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="mb-4 p-3 bg-gray-800/50 rounded-lg border border-gray-700 cursor-pointer hover:bg-gray-700 transition"
-                    onClick={() => handleClickResult(item.link)}
-                  >
-                    <h4 className="font-semibold text-purple-400">{item.title}</h4>
-                    <p className="text-gray-300 mt-1">{item.snippet}</p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="flex-1 flex flex-col">
+            <div className="p-6 overflow-y-auto flex-1">
+              {results.map((item, idx) => (
                 <div
-                  className="p-3 bg-gray-800 text-white cursor-pointer hover:bg-gray-700 border-b border-gray-700"
-                  onClick={handleBack}
+                  key={idx}
+                  className="mb-4 p-3 bg-gray-800/50 rounded-lg border border-gray-700 cursor-pointer hover:bg-gray-700 transition"
+                  onClick={() => handleClickResult(item.link)}
                 >
-                  ⬅ Back to results
+                  <h4 className="font-semibold text-purple-400">{item.title}</h4>
+                  <p className="text-gray-300 mt-1">{item.snippet}</p>
                 </div>
-                <iframe src={iframeUrl} className="flex-1 w-full" title="Embedded Page" />
-              </div>
-            )}
+              ))}
+            </div>
           </div>
         </div>
       )}
