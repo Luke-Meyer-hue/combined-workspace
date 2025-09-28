@@ -32,7 +32,7 @@ function App() {
           break;
         case "enter":
           e.preventDefault();
-          // could add "submenus" or confirmation later
+          // Could trigger submenu or confirmation later
           break;
       }
     };
@@ -44,7 +44,7 @@ function App() {
   const ActiveComponent = sections[selectedSection].component;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white flex">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white flex font-mono">
       {/* Sidebar Menu */}
       <div className="w-64 border-r border-purple-600 bg-gray-800/80 flex flex-col">
         <div className="p-6 text-2xl font-bold text-purple-300 text-center border-b border-purple-600">
