@@ -1,53 +1,55 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Plus, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, X, Trash2 } from 'lucide-react';
 
 const CalendarSection: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [events, setEvents] = useState<{ [key: string]: string[] }>({});
   const [showModal, setShowModal] = useState(false);
+  const [showManage, setShowManage] = useState(false);
   const [newEventDate, setNewEventDate] = useState('');
   const [newEventText, setNewEventText] = useState('');
 
   const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'January','February','March','April','May','June',
+    'July','August','September','October','November','December'
   ];
+  const daysOfWeek = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
-  const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const getDaysInMonth = (date: Date) =>
+    new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
 
-  const getDaysInMonth = (date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-  };
+  const getFirstDayOfMonth = (date: Date) =>
+    new Date(date.getFullYear(), date.getMonth(), 1).getDay();
 
-  const getFirstDayOfMonth = (date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-  };
-
-  const formatDate = (year: number, month: number, day: number) => {
-    return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-  };
+  const formatDate = (year: number, month: number, day: number) =>
+    `${year}-${String(month + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
 
   const navigateMonth = (direction: 'prev' | 'next') => {
     setCurrentDate(prev => {
       const newDate = new Date(prev);
-      if (direction === 'prev') {
-        newDate.setMonth(prev.getMonth() - 1);
-      } else {
-        newDate.setMonth(prev.getMonth() + 1);
-      }
+      newDate.setMonth(prev.getMonth() + (direction === 'prev' ? -1 : 1));
       return newDate;
     });
   };
 
-  // Load events from localStorage
+  // Load & clean events
   useEffect(() => {
-    const storedEvents = localStorage.getItem('calendarEvents');
-    if (storedEvents) {
-      setEvents(JSON.parse(storedEvents));
+    const stored = localStorage.getItem('calendarEvents');
+    if (stored) {
+      let parsed: { [key: string]: string[] } = JSON.parse(stored);
+
+      // remove past events
+      const today = new Date();
+      parsed = Object.fromEntries(
+        Object.entries(parsed).filter(([date]) => new Date(date) >= today)
+      );
+
+      setEvents(parsed);
+      localStorage.setItem('calendarEvents', JSON.stringify(parsed));
     }
   }, []);
 
-  // Save events to localStorage when they change
+  // Save when events change
   useEffect(() => {
     localStorage.setItem('calendarEvents', JSON.stringify(events));
   }, [events]);
@@ -67,6 +69,15 @@ const CalendarSection: React.FC = () => {
     setShowModal(false);
   };
 
+  const deleteEvent = (dateKey: string, index: number) => {
+    setEvents(prev => {
+      const updated = { ...prev };
+      updated[dateKey].splice(index, 1);
+      if (updated[dateKey].length === 0) delete updated[dateKey];
+      return updated;
+    });
+  };
+
   const renderCalendarDays = () => {
     const daysInMonth = getDaysInMonth(currentDate);
     const firstDay = getFirstDayOfMonth(currentDate);
@@ -77,12 +88,10 @@ const CalendarSection: React.FC = () => {
 
     const days = [];
 
-    // Empty cells for days before the first day
     for (let i = 0; i < firstDay; i++) {
       days.push(<div key={`empty-${i}`} className="h-20"></div>);
     }
 
-    // Days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       const dateKey = formatDate(currentDate.getFullYear(), currentDate.getMonth(), day);
       const hasEvents = events[dateKey] && events[dateKey].length > 0;
@@ -92,7 +101,7 @@ const CalendarSection: React.FC = () => {
         <div
           key={day}
           className={`
-            h-20 p-2 rounded-xl border transition-all duration-200 cursor-pointer
+            h-20 p-2 rounded-xl border transition-all cursor-pointer
             ${isToday ? 'bg-purple-800/40 border-purple-400' : 'bg-gray-900/50 border-gray-700/60'}
             ${hasEvents ? 'ring-2 ring-blue-400/50' : ''}
             hover:bg-gray-700/40 hover:border-purple-500
@@ -102,12 +111,7 @@ const CalendarSection: React.FC = () => {
             setShowModal(true);
           }}
         >
-          <div
-            className={`
-              text-sm font-bold
-              ${isToday ? 'text-purple-300' : 'text-gray-300'}
-            `}
-          >
+          <div className={`text-sm font-bold ${isToday ? 'text-purple-300' : 'text-gray-300'}`}>
             {day}
           </div>
           {hasEvents && (
@@ -134,7 +138,7 @@ const CalendarSection: React.FC = () => {
 
   return (
     <div className="h-full flex flex-col">
-      {/* Calendar Header */}
+      {/* Header */}
       <div className="flex items-center justify-between mb-6 border-b border-purple-600 pb-3">
         <div className="flex items-center space-x-4">
           <button
@@ -156,51 +160,48 @@ const CalendarSection: React.FC = () => {
           </button>
         </div>
 
-        <button
-          onClick={() => setShowModal(true)}
-          className="flex items-center space-x-2 px-4 py-2 bg-purple-700/70 border border-purple-500 rounded-lg hover:bg-purple-600 transition-all"
-        >
-          <Plus size={16} />
-          <span className="font-semibold">Add Event</span>
-        </button>
-      </div>
-
-      {/* Calendar Grid */}
-      <div className="flex-1 min-h-0">
-        {/* Days of week header */}
-        <div className="grid grid-cols-7 gap-2 mb-2 text-center">
-          {daysOfWeek.map(day => (
-            <div
-              key={day}
-              className="text-sm font-semibold text-purple-400 border-b border-purple-600 pb-1"
-            >
-              {day}
-            </div>
-          ))}
+        <div className="space-x-2 flex">
+          <button
+            onClick={() => setShowModal(true)}
+            className="flex items-center space-x-2 px-4 py-2 bg-purple-700/70 border border-purple-500 rounded-lg hover:bg-purple-600"
+          >
+            <Plus size={16} />
+            <span className="font-semibold">Add Event</span>
+          </button>
+          <button
+            onClick={() => setShowManage(true)}
+            className="flex items-center space-x-2 px-4 py-2 bg-gray-700 border border-red-500 rounded-lg hover:bg-red-600"
+          >
+            <Trash2 size={16} />
+            <span className="font-semibold">Manage</span>
+          </button>
         </div>
-
-        {/* Calendar days */}
-        <div className="grid grid-cols-7 gap-2">{renderCalendarDays()}</div>
       </div>
 
-      {/* Quick Stats */}
+      {/* Days of week */}
+      <div className="grid grid-cols-7 gap-2 mb-2 text-center">
+        {daysOfWeek.map(day => (
+          <div key={day} className="text-sm font-semibold text-purple-400 border-b border-purple-600 pb-1">
+            {day}
+          </div>
+        ))}
+      </div>
+
+      {/* Calendar days */}
+      <div className="grid grid-cols-7 gap-2 flex-1 min-h-0">{renderCalendarDays()}</div>
+
+      {/* Stats */}
       <div className="mt-6 pt-4 border-t border-purple-600 grid grid-cols-3 gap-4 text-center">
         <div>
-          <div className="text-2xl font-bold text-purple-400">
-            {Object.keys(events).length}
-          </div>
+          <div className="text-2xl font-bold text-purple-400">{Object.keys(events).length}</div>
           <div className="text-xs text-gray-400">Days with Events</div>
         </div>
         <div>
-          <div className="text-2xl font-bold text-blue-400">
-            {Object.values(events).flat().length}
-          </div>
+          <div className="text-2xl font-bold text-blue-400">{Object.values(events).flat().length}</div>
           <div className="text-xs text-gray-400">Total Events</div>
         </div>
         <div>
-          <div className="text-2xl font-bold text-green-400">
-            {new Date().getDate()}
-          </div>
+          <div className="text-2xl font-bold text-green-400">{new Date().getDate()}</div>
           <div className="text-xs text-gray-400">Today</div>
         </div>
       </div>
@@ -223,7 +224,7 @@ const CalendarSection: React.FC = () => {
               type="date"
               value={newEventDate}
               onChange={(e) => setNewEventDate(e.target.value)}
-              className="w-full px-3 py-2 mb-4 rounded-lg bg-gray-800 border border-purple-600 text-white focus:outline-none focus:border-purple-400"
+              className="w-full px-3 py-2 mb-4 rounded-lg bg-gray-800 border border-purple-600 text-white"
             />
 
             <label className="block text-sm text-gray-400 mb-2">Event</label>
@@ -232,15 +233,56 @@ const CalendarSection: React.FC = () => {
               placeholder="Enter event..."
               value={newEventText}
               onChange={(e) => setNewEventText(e.target.value)}
-              className="w-full px-3 py-2 mb-4 rounded-lg bg-gray-800 border border-purple-600 text-white focus:outline-none focus:border-purple-400"
+              className="w-full px-3 py-2 mb-4 rounded-lg bg-gray-800 border border-purple-600 text-white"
             />
 
             <button
               onClick={addEvent}
-              className="w-full py-2 bg-purple-700 border border-purple-500 rounded-lg hover:bg-purple-600 transition-all font-semibold"
+              className="w-full py-2 bg-purple-700 border border-purple-500 rounded-lg hover:bg-purple-600 font-semibold"
             >
               Save Event
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Manage Events Modal */}
+      {showManage && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-gray-900 border border-red-600 rounded-xl p-6 w-[32rem] max-h-[80vh] overflow-y-auto relative">
+            <button
+              onClick={() => setShowManage(false)}
+              className="absolute top-3 right-3 text-gray-400 hover:text-white"
+            >
+              <X size={20} />
+            </button>
+
+            <h3 className="text-lg font-bold text-red-400 mb-4">Manage Events</h3>
+
+            {Object.entries(events).length === 0 && (
+              <p className="text-gray-400">No events to manage.</p>
+            )}
+
+            <div className="space-y-4">
+              {Object.entries(events).map(([date, evs]) => (
+                <div key={date} className="border-b border-gray-700 pb-2">
+                  <p className="text-purple-300 font-semibold mb-2">{date}</p>
+                  <ul className="space-y-2">
+                    {evs.map((ev, idx) => (
+                      <li key={idx} className="flex justify-between items-center bg-gray-800 px-3 py-1 rounded">
+                        <span>{ev}</span>
+                        <button
+                          onClick={() => deleteEvent(date, idx)}
+                          className="text-red-400 hover:text-red-600"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
