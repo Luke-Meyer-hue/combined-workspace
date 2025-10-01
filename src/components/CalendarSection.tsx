@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ChevronLeft, ChevronRight, Plus, X } from 'lucide-react';
 
 const CalendarSection: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [events, setEvents] = useState<{ [key: string]: string[] }>({
-    '2025-01-15': ['Team Meeting at 10:00 AM'],
-    '2025-01-22': ['Project Deadline'],
-  });
+  const [events, setEvents] = useState<{ [key: string]: string[] }>({});
+  const [showModal, setShowModal] = useState(false);
+  const [newEventDate, setNewEventDate] = useState('');
+  const [newEventText, setNewEventText] = useState('');
 
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -39,6 +39,34 @@ const CalendarSection: React.FC = () => {
     });
   };
 
+  // Load events from localStorage
+  useEffect(() => {
+    const storedEvents = localStorage.getItem('calendarEvents');
+    if (storedEvents) {
+      setEvents(JSON.parse(storedEvents));
+    }
+  }, []);
+
+  // Save events to localStorage when they change
+  useEffect(() => {
+    localStorage.setItem('calendarEvents', JSON.stringify(events));
+  }, [events]);
+
+  const addEvent = () => {
+    if (!newEventDate || !newEventText.trim()) return;
+
+    setEvents(prev => {
+      const updated = { ...prev };
+      if (!updated[newEventDate]) updated[newEventDate] = [];
+      updated[newEventDate].push(newEventText.trim());
+      return updated;
+    });
+
+    setNewEventText('');
+    setNewEventDate('');
+    setShowModal(false);
+  };
+
   const renderCalendarDays = () => {
     const daysInMonth = getDaysInMonth(currentDate);
     const firstDay = getFirstDayOfMonth(currentDate);
@@ -69,6 +97,10 @@ const CalendarSection: React.FC = () => {
             ${hasEvents ? 'ring-2 ring-blue-400/50' : ''}
             hover:bg-gray-700/40 hover:border-purple-500
           `}
+          onClick={() => {
+            setNewEventDate(dateKey);
+            setShowModal(true);
+          }}
         >
           <div
             className={`
@@ -124,7 +156,10 @@ const CalendarSection: React.FC = () => {
           </button>
         </div>
 
-        <button className="flex items-center space-x-2 px-4 py-2 bg-purple-700/70 border border-purple-500 rounded-lg hover:bg-purple-600 transition-all">
+        <button
+          onClick={() => setShowModal(true)}
+          className="flex items-center space-x-2 px-4 py-2 bg-purple-700/70 border border-purple-500 rounded-lg hover:bg-purple-600 transition-all"
+        >
           <Plus size={16} />
           <span className="font-semibold">Add Event</span>
         </button>
@@ -154,13 +189,13 @@ const CalendarSection: React.FC = () => {
           <div className="text-2xl font-bold text-purple-400">
             {Object.keys(events).length}
           </div>
-          <div className="text-xs text-gray-400">Total Events</div>
+          <div className="text-xs text-gray-400">Days with Events</div>
         </div>
         <div>
           <div className="text-2xl font-bold text-blue-400">
             {Object.values(events).flat().length}
           </div>
-          <div className="text-xs text-gray-400">This Month</div>
+          <div className="text-xs text-gray-400">Total Events</div>
         </div>
         <div>
           <div className="text-2xl font-bold text-green-400">
@@ -169,6 +204,46 @@ const CalendarSection: React.FC = () => {
           <div className="text-xs text-gray-400">Today</div>
         </div>
       </div>
+
+      {/* Add Event Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-gray-900 border border-purple-600 rounded-xl p-6 w-96 shadow-lg relative">
+            <button
+              onClick={() => setShowModal(false)}
+              className="absolute top-3 right-3 text-gray-400 hover:text-white"
+            >
+              <X size={20} />
+            </button>
+
+            <h3 className="text-lg font-bold text-purple-300 mb-4">Add Event</h3>
+
+            <label className="block text-sm text-gray-400 mb-2">Date</label>
+            <input
+              type="date"
+              value={newEventDate}
+              onChange={(e) => setNewEventDate(e.target.value)}
+              className="w-full px-3 py-2 mb-4 rounded-lg bg-gray-800 border border-purple-600 text-white focus:outline-none focus:border-purple-400"
+            />
+
+            <label className="block text-sm text-gray-400 mb-2">Event</label>
+            <input
+              type="text"
+              placeholder="Enter event..."
+              value={newEventText}
+              onChange={(e) => setNewEventText(e.target.value)}
+              className="w-full px-3 py-2 mb-4 rounded-lg bg-gray-800 border border-purple-600 text-white focus:outline-none focus:border-purple-400"
+            />
+
+            <button
+              onClick={addEvent}
+              className="w-full py-2 bg-purple-700 border border-purple-500 rounded-lg hover:bg-purple-600 transition-all font-semibold"
+            >
+              Save Event
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
