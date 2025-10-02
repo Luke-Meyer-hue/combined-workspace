@@ -18,12 +18,12 @@ const SearchSection: React.FC = () => {
   const [showPanel, setShowPanel] = useState(false);
 
   const quickLinks = [
-    { name: "YouTube", url: "https://youtube.com", color: "bg-red-500/20 text-red-300" },
-    { name: "GitHub", url: "https://github.com", color: "bg-gray-500/20 text-gray-300" },
-    { name: "Stack Overflow", url: "https://stackoverflow.com", color: "bg-orange-500/20 text-orange-300" },
-    { name: "MDN Docs", url: "https://developer.mozilla.org", color: "bg-blue-500/20 text-blue-300" },
-    { name: "React Docs", url: "https://react.dev", color: "bg-cyan-500/20 text-cyan-300" },
-    { name: "Tailwind CSS", url: "https://tailwindcss.com", color: "bg-teal-500/20 text-teal-300" },
+    { name: "YouTube", url: "https://youtube.com" },
+    { name: "GitHub", url: "https://github.com" },
+    { name: "Stack Overflow", url: "https://stackoverflow.com" },
+    { name: "MDN Docs", url: "https://developer.mozilla.org" },
+    { name: "React Docs", url: "https://react.dev" },
+    { name: "Tailwind CSS", url: "https://tailwindcss.com" },
   ];
 
   const handleSearch = async (q: string) => {
@@ -58,93 +58,88 @@ const SearchSection: React.FC = () => {
   };
 
   return (
-    <div className="h-full flex flex-col space-y-8">
-      {/* Search Bar */}
-      <div className="text-center">
-        <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-          Universal Search
-        </h3>
-        <div className="relative max-w-2xl mx-auto">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <Search className="text-gray-400" size={20} />
-          </div>
-          <input
-            type="text"
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Search anything on the web..."
-            className="w-full pl-12 pr-4 py-4 bg-gray-800/50 border border-gray-600 rounded-2xl 
-                       focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
-                       text-lg placeholder-gray-400 transition-all duration-200"
-          />
-        </div>
+    <div className="h-full flex flex-col space-y-6 font-mono">
+      {/* Title */}
+      <h3 className="text-xl mb-2 text-purple-300 flex items-center">
+        <Search className="mr-2 text-purple-400" size={20} /> Search Menu
+      </h3>
+
+      {/* Search Box */}
+      <div className="border-2 border-purple-500 bg-gray-900/80 p-3 rounded-none shadow-lg">
+        <input
+          type="text"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder="> Enter your query..."
+          className="w-full bg-transparent focus:outline-none text-purple-200 placeholder-purple-400 text-lg"
+        />
       </div>
 
-      {/* Quick Links */}
+      {/* Quick Links styled like RPG buttons */}
       <div>
-        <h4 className="text-lg font-semibold mb-4 text-gray-300">Quick Links</h4>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <h4 className="text-purple-300 mb-2">Quick Links</h4>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
           {quickLinks.map(link => (
             <a
               key={link.name}
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className={`p-3 rounded-lg border border-gray-700 transition-all duration-200
-                         hover:scale-105 hover:border-gray-600 ${link.color}
-                         flex items-center justify-center space-x-2`}
+              className="border-2 border-purple-500 bg-gray-800/80 hover:bg-purple-700/40 
+                         text-purple-200 px-3 py-2 text-center transition-all duration-150
+                         flex items-center justify-center space-x-2 shadow-md"
             >
-              <ExternalLink size={16} />
-              <span className="font-medium">{link.name}</span>
+              <ExternalLink size={14} className="text-purple-400" />
+              <span>{link.name}</span>
             </a>
           ))}
         </div>
       </div>
 
-      {/* Recent Searches */}
+      {/* Recent Searches as selectable list */}
       {searchHistory.length > 0 && (
         <div>
-          <h4 className="text-lg font-semibold mb-4 text-gray-300">Recent Searches</h4>
-          <div className="space-y-2">
+          <h4 className="text-purple-300 mb-2">Recent Searches</h4>
+          <div className="space-y-1">
             {searchHistory.slice(0, 5).map((historyQuery, index) => (
               <button
                 key={index}
                 onClick={() => handleSearch(historyQuery)}
-                className="w-full text-left p-3 bg-gray-800/30 hover:bg-gray-700/50 
-                         rounded-lg border border-gray-700/50 transition-colors duration-200
-                         flex items-center space-x-3"
+                className="w-full text-left px-3 py-2 border-2 border-purple-500 
+                           bg-gray-800/80 hover:bg-purple-700/40 text-purple-200 
+                           flex items-center space-x-2 transition-all duration-150"
               >
-                <Search size={16} className="text-gray-400 flex-shrink-0" />
-                <span className="text-gray-300 truncate">{historyQuery}</span>
+                <Search size={14} className="text-purple-400 flex-shrink-0" />
+                <span>{historyQuery}</span>
               </button>
             ))}
           </div>
         </div>
       )}
 
-      {/* Panel for search results */}
+      {/* RPG-style Results Panel */}
       {showPanel && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="relative bg-gray-900 border-4 border-purple-500 rounded-2xl w-11/12 md:w-4/5 h-5/6 shadow-xl overflow-hidden flex flex-col">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="relative bg-gray-900 border-4 border-purple-500 shadow-xl w-11/12 md:w-4/5 h-5/6 flex flex-col">
             <button
               onClick={() => setShowPanel(false)}
-              className="absolute top-4 right-4 bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded-lg flex items-center space-x-1 z-10"
+              className="absolute top-2 right-2 border-2 border-purple-500 bg-gray-800 hover:bg-purple-600 text-purple-200 px-3 py-1 flex items-center space-x-1"
             >
-              <X size={16} /> <span>Close</span>
+              <X size={14} /> <span>Close</span>
             </button>
 
-            <div className="p-6 overflow-y-auto flex-1">
+            <div className="p-4 overflow-y-auto flex-1">
               {results.map((item, idx) => (
                 <a
                   key={idx}
                   href={item.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block mb-4 p-3 bg-gray-800/50 rounded-lg border border-gray-700 hover:bg-gray-700 transition"
+                  className="block mb-3 border-2 border-purple-500 bg-gray-800/80 hover:bg-purple-700/40 p-3 transition"
                 >
-                  <h4 className="font-semibold text-purple-400">{item.title}</h4>
-                  <p className="text-gray-300 mt-1">{item.snippet}</p>
+                  <h4 className="text-purple-300">{item.title}</h4>
+                  <p className="text-gray-300 text-sm">{item.snippet}</p>
                 </a>
               ))}
             </div>
