@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Calendar, Search, Package } from "lucide-react";
 import CalendarSection from "./components/CalendarSection";
 import SearchSection from "./components/SearchSection";
-import BlankSection from "./components/BlankSection";
+import BlankSection from "./components/WorkspaceSection";
 
 function App() {
   const [selectedSection, setSelectedSection] = useState(0);
@@ -47,9 +47,13 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white flex font-mono">
       {/* Sidebar Menu */}
       <div className="w-64 border-r border-purple-600 bg-gray-800/80 flex flex-col">
-        <div className="p-6 text-2xl font-bold text-purple-300 text-center border-b border-purple-600">
-          JRPG Menu
-        </div>
+      <div className="p-6 text-center border-b border-purple-600">
+        <img 
+          src="/images/Search.png" 
+          alt="App Logo" 
+          className="mx-auto w-32 h-auto" 
+        />
+      </div>
 
         <div className="flex-1 flex flex-col">
           {sections.map((section, index) => {
