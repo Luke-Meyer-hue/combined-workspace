@@ -52,7 +52,7 @@ function App() {
         <img 
           src={logo} 
           alt="App Logo" 
-          className="mx-auto w-32 h-auto" 
+          className="w-full h-full object-cover" 
         />
       </div>
 
