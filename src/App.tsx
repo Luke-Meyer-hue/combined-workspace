@@ -48,7 +48,7 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white flex font-mono">
       {/* Sidebar Menu */}
       <div className="w-64 border-r border-purple-600 bg-gray-800/80 flex flex-col">
-      <div className="p-6 text-center border-b border-purple-600">
+      <div className="text-center border-b border-purple-600">
         <img 
           src={logo} 
           alt="App Logo" 
