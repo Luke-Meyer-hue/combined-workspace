@@ -34,7 +34,6 @@ const WorkspaceSection: React.FC = () => {
     }
   };
 
-
   return (
     <section className="h-full flex flex-col" aria-labelledby="workspace-title">
       {/* Header */}
@@ -68,33 +67,32 @@ const WorkspaceSection: React.FC = () => {
         </nav>
       </header>
 
-      {/* App List */}
-      <main className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 flex-1">
-        {filteredApps.map((app) => (
-          <article
-            key={app.name}
-            onClick={() => openApp(app)}
-            className="p-4 border border-gray-700 rounded-lg bg-gray-800/70 hover:border-purple-400 hover:scale-105 transition cursor-pointer"
-            role="button"
-            tabIndex={0}
-            aria-label={`Open ${app.name}`}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") openApp(app);
-            }}
-          >
-            <figure className="mb-3">
-              <div className="h-16 w-16 bg-gray-600/40 rounded-lg flex items-center justify-center">
-                <span className="text-gray-300 text-lg" aria-hidden="true">
-                  {app.name[0]}
-                </span>
+      {/* App List - RPG Inventory Style */}
+      <main className="flex-1 bg-gray-900/70 border border-gray-700 rounded-lg overflow-hidden">
+        <ul className="divide-y divide-gray-700">
+          {filteredApps.map((app) => (
+            <li
+              key={app.name}
+              onClick={() => openApp(app)}
+              role="button"
+              tabIndex={0}
+              aria-label={`Open ${app.name}`}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") openApp(app);
+              }}
+              className="flex items-center justify-between px-4 py-3 hover:bg-gray-700/50 cursor-pointer transition"
+            >
+              {/* Left side - icon + name */}
+              <div className="flex items-center gap-3">
+                <span className="text-purple-300">🧪</span>
+                <span className="text-gray-200 font-medium">{app.name}</span>
               </div>
-              <figcaption className="mt-2">
-                <p className="text-gray-200 font-medium">{app.name}</p>
-                <p className="text-xs text-gray-400">{app.category}</p>
-              </figcaption>
-            </figure>
-          </article>
-        ))}
+
+              {/* Right side - mimic item count (if provided in JSON) */}
+              <span className="text-gray-400">{app.count ?? 1}</span>
+            </li>
+          ))}
+        </ul>
       </main>
     </section>
   );
