@@ -3,6 +3,7 @@ import { Calendar, Search, Package } from "lucide-react";
 import CalendarSection from "./components/CalendarSection";
 import SearchSection from "./components/SearchSection";
 import BlankSection from "./components/WorkspaceSection";
+import logo from "./images/Search.png";
 
 function App() {
   const [selectedSection, setSelectedSection] = useState(0);
@@ -49,7 +50,7 @@ function App() {
       <div className="w-64 border-r border-purple-600 bg-gray-800/80 flex flex-col">
       <div className="p-6 text-center border-b border-purple-600">
         <img 
-          src="/images/Search.png" 
+          src={logo} 
           alt="App Logo" 
           className="mx-auto w-32 h-auto" 
         />
